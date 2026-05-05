@@ -27,6 +27,8 @@ class VectorDB:
             pickle.dump(self.labels, f)
 
     def load(self):
-        self.index = faiss.read_index("data/faiss.index")
-        with open("data/labels.pkl", "rb") as f:
-            self.labels = pickle.load(f)
+        if os.path.exists("data/faiss.index"):
+            self.index = faiss.read_index("data/faiss.index")
+        if os.path.exists("data/labels.pkl"):
+            with open("data/labels.pkl", "rb") as f:
+               self.labels = pickle.load(f)

@@ -6,12 +6,18 @@ import cv2
 from app.core.recognizer import FaceRecognizer
 from app.core.vector_db import VectorDB
 from app.services.enrollment import EnrollmentService
+from app.services.pipeline import run_pipeline
 
 app = FastAPI()
 
-recognizer = FaceRecognizer()
-db = VectorDB()
-enrollment = EnrollmentService(recognizer, db)
+if __name__ != "__main__":
+    recognizer = FaceRecognizer()
+    db = VectorDB()
+    enrollment = EnrollmentService(recognizer, db)
+else:
+    recognizer = None
+    db = None
+    enrollment = None
 
 
 @app.get("/")
@@ -78,3 +84,7 @@ async def recognize(file: UploadFile):
     "match": label,
     "score": score
     }
+
+
+if __name__ == "__main__":
+    run_pipeline()
