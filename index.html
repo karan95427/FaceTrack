@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body { background:#0f172a; color:white; font-family:sans-serif; padding:20px; }
+input, button { width:100%; padding:15px; margin-top:10px; border-radius:10px; border:none; }
+button { background:#3b82f6; color:white; font-weight:bold; }
+img { width:70px; margin:5px; border-radius:8px; }
+</style>
+</head>
+
+<body>
+
+<h2>Enroll Person</h2>
+
+<input id="personName" name="name" placeholder="Enter Name">
+<input type="file" id="images" multiple accept="image/*">
+
+<div id="preview"></div>
+
+<button onclick="upload()">Enroll</button>
+
+<p id="status"></p>
+
+<script>
+const preview = document.getElementById("preview");
+const imagesInput = document.getElementById("images");
+const statusText = document.getElementById("status");
+
+imagesInput.onchange = () => {
+  preview.innerHTML = "";
+  [...imagesInput.files].forEach(file => {
+    let img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    preview.appendChild(img);
+  });
+};
+
+async function upload() {
+  const form = new FormData();
+  const personName = document.getElementById("personName").value.trim();
+  form.append("name", personName);
+
+  for (let f of imagesInput.files) {
+    form.append("files", f);
+  }
+
+  const res = await fetch("http://localhost:8000/enroll", {
+    method: "POST",
+    body: form
+  });
+
+  const data = await res.json();
+  statusText.innerText = data.message;
+}
+</script>
+
+</body>
+</html>
