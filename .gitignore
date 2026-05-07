@@ -2,3 +2,6 @@ GEMINI.md
 gpt.md
 Memory.md
 venv
+node_modules
+dist
+.env
