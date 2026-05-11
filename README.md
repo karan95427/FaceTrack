@@ -265,6 +265,3 @@ Frontend scripts from package.json:
 - Optional PostgreSQL metadata logging: implemented
 - Performance optimization for high FPS: in progress
 
-## License
-
-Add your preferred license here.
