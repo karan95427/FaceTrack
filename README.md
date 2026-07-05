@@ -1,267 +1,298 @@
-# FaceAI Command Center
+# FaceAI Command Center – Real-Time Face Recognition & Attendance Platform
 
-Real-time face enrollment and live recognition system with a React dashboard and FastAPI backend.
+FaceAI Command Center is a production-oriented real-time face recognition platform that combines deep learning, vector search, and modern web technologies to identify enrolled users from live webcam streams.
 
-## What this project does
+Instead of relying on traditional face recognition approaches, the system uses InsightFace embeddings, FAISS vector search, and a multi-angle enrollment pipeline to improve recognition robustness across different poses and lighting conditions.
 
-- Enrolls a person from multiple guided camera captures (pose-based flow).
-- Extracts face embeddings using InsightFace.
-- Stores embeddings in FAISS for fast similarity search.
-- Runs live recognition from webcam frames.
-- Shows detection history, confidence, and live stats in the frontend.
-- Optionally records enrollment metadata in PostgreSQL.
+---
 
-## Tech stack
+# Features
 
-### Frontend
+## Multi-Angle Face Enrollment
 
-- React 19 + Vite 7
+Users enroll by capturing multiple guided face poses:
+
+- Straight
+- Left
+- Right
+- Up
+- Down
+
+The enrollment pipeline validates:
+
+- Face visibility
+- Detection confidence
+- Stability
+- Face size
+- Single-face requirement
+
+before generating embeddings.
+
+---
+
+## Real-Time Face Recognition
+
+The system performs:
+
+- Live webcam detection
+- Face embedding generation
+- Vector similarity search
+- Identity matching
+- Confidence scoring
+
+in real time.
+
+---
+
+## Vector Search with FAISS
+
+Instead of comparing faces sequentially, the system:
+
+- Generates normalized InsightFace embeddings
+- Stores them inside a FAISS vector index
+- Performs fast cosine similarity search
+- Returns the closest matching identities
+
+This enables scalable face recognition as the number of enrolled users grows.
+
+---
+
+## Intelligent Recognition Pipeline
+
+Recognition combines:
+
+- Face Detection
+- Embedding Generation
+- FAISS Vector Retrieval
+- Similarity Thresholding
+- Confidence Scoring
+
+to improve recognition accuracy.
+
+---
+
+## Interactive Dashboard
+
+React dashboard provides:
+
+- Live webcam feed
+- Detection history
+- Confidence scores
+- Recognition statistics
+- Enrollment workflow
+- Real-time recognition status
+
+---
+
+# Tech Stack
+
+## Frontend
+
+- React 19
+- Vite 7
 - Tailwind CSS
 - Framer Motion
 - React Router
 
-### Backend
+## Backend
 
 - FastAPI
-- InsightFace (buffalo_l)
-- ONNX Runtime (CUDA + CPU providers configured)
-- OpenCV
-- FAISS (inner-product index for cosine similarity)
-- NumPy
-- Optional PostgreSQL via psycopg
+- Python
 
-## Project structure
+## AI / Computer Vision
+
+- InsightFace (buffalo_l)
+- ONNX Runtime
+- OpenCV
+- FAISS
+- NumPy
+
+## Database
+
+- PostgreSQL (optional metadata storage)
+
+---
+
+# System Architecture
+
+```
+                    Webcam
+                      │
+                      ▼
+              Face Detection
+                 (InsightFace)
+                      │
+                      ▼
+            Face Embedding Generation
+                      │
+                      ▼
+             Embedding Normalization
+                      │
+                      ▼
+               FAISS Vector Search
+                      │
+                      ▼
+          Cosine Similarity Matching
+                      │
+                      ▼
+          Identity + Confidence Score
+                      │
+                      ▼
+            Live Dashboard Results
+```
+
+---
+
+# Project Structure
 
 ```text
-Face_ai/
-  app/
-    main.py                  # FastAPI app + routes
-    core/
-      recognizer.py          # InsightFace wrapper
-      vector_db.py           # FAISS index and labels persistence
-      matcher.py             # Similarity matching logic
-      camera.py              # OpenCV camera helper
-      database.py            # Optional PostgreSQL metadata storage
-    services/
-      enrollment.py          # Enrollment pipeline (multi-image)
-      pipeline.py            # OpenCV real-time pipeline (desktop)
-  src/
-    pages/
-      EnrollmentPage.jsx
-      LiveDetectionPage.jsx
-    hooks/
-      useCamera.js
-      useEnrollmentFlow.js
-      useFaceDetection.js
-    services/
-      apiBase.js
-      enrollmentService.js
-      faceApi.js
-  data/
-    faiss.index              # Saved vector index
-    labels.pkl               # Label mapping
+FaceAI/
+│
+├── app/
+│   ├── api/
+│   ├── core/
+│   ├── services/
+│   ├── database/
+│   └── main.py
+│
+├── src/
+│   ├── pages/
+│   ├── hooks/
+│   ├── services/
+│   └── components/
+│
+├── data/
+│   ├── faiss.index
+│   └── labels.pkl
+│
+└── README.md
 ```
 
-## Prerequisites
+---
 
-- Python 3.10+
-- Node.js 18+
-- npm 9+
-- Webcam access in browser
+# Application Workflow
 
-For GPU acceleration on Windows, install a compatible NVIDIA driver and CUDA runtime stack for your ONNX Runtime build.
+### 1. Multi-Angle Enrollment
 
-## Setup
+The user captures multiple guided face poses.
 
-### 1. Clone and open
+↓
 
-```powershell
-git clone <your-repo-url>
-cd Face_ai
-```
+### 2. Face Validation
 
-### 2. Python environment and backend dependencies
+The system validates:
 
-```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-pip install fastapi uvicorn python-multipart numpy opencv-python insightface onnxruntime faiss-cpu psycopg[binary]
-```
+- Detection confidence
+- Face size
+- Stability
+- Single face
 
-Notes:
-- If you plan to run GPU inference, install the ONNX Runtime GPU package variant appropriate for your CUDA setup.
-- The app stores FAISS artifacts in the data directory. Ensure data exists.
+↓
 
-### 3. Frontend dependencies
+### 3. Embedding Generation
 
-```powershell
-npm install
-```
+InsightFace generates high-dimensional face embeddings.
 
-## Running the app
+↓
 
-### Option A: Full web app (recommended)
+### 4. Vector Storage
 
-Run backend:
+Normalized embeddings are stored inside FAISS.
 
-```powershell
-.\venv\Scripts\Activate.ps1
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
+↓
 
-Run frontend in another terminal:
+### 5. Live Recognition
 
-```powershell
-npm run dev
-```
+Incoming webcam frames generate new embeddings.
 
-Open:
-- Frontend: http://localhost:5173
-- Backend API docs: http://localhost:8000/docs
+↓
 
-### Option B: Backend serves built frontend from dist
+### 6. Vector Search
 
-Build frontend:
+FAISS retrieves the closest enrolled identity.
 
-```powershell
-npm run build
-```
+↓
 
-Then run backend:
+### 7. Recognition
 
-```powershell
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
+The system returns:
 
-Open: http://localhost:8000
+- Person name
+- Similarity score
+- Confidence
+- Detection metadata
 
-### Option C: Desktop OpenCV real-time pipeline
+---
 
-```powershell
-python app/main.py
-```
-
-This starts the OpenCV recognition window and does not run the FastAPI web server.
-
-## API endpoints
-
-### GET /
-
-- Returns dist/index.html if present, otherwise root index.html.
+# REST API
 
 ### POST /enroll
 
-- Form fields:
-  - name: string
-  - files: multiple images
-- Behavior:
-  - Detects largest face per image.
-  - Filters low-quality faces.
-  - Normalizes embeddings.
-  - Adds all valid embeddings to FAISS.
-  - Saves index and labels to data.
-  - Optionally logs enrollment session to PostgreSQL.
+Enroll a new user from multiple captured images.
 
 ### POST /recognize
 
-- Form field:
-  - file: image
-- Returns best match with similarity score.
+Recognize a face from a single uploaded image.
 
 ### POST /recognize/live
 
-- Form field:
-  - file: frame image
-- Returns list of detections with:
-  - normalized bounding box
-  - name
-  - confidence
-  - similarity
-  - face pose and keypoints (when available)
+Real-time recognition endpoint used by the frontend dashboard.
 
-## Environment variables
+---
 
-Frontend:
-- VITE_API_BASE_URL (optional)
-  - If unset, frontend auto-targets port 8000 on the same host.
+# Performance Features
 
-Backend PostgreSQL metadata logging (optional):
-- DATABASE_URL
+- Multi-angle enrollment
+- Cosine similarity search
+- High-speed FAISS retrieval
+- GPU acceleration support through ONNX Runtime
+- Persistent vector database
+- Modular FastAPI architecture
 
-Or individual variables:
-- PGPASSWORD
-- PGHOST (default localhost)
-- PGPORT (default 5432)
-- PGUSER (default postgres)
-- PGDATABASE (default face_ai)
+---
 
-You can place these in a local .env file for backend metadata storage.
+# Key Learnings
 
-## How enrollment quality works
+This project provided practical experience with:
 
-The frontend guided flow checks:
+- Face Recognition Systems
+- Deep Face Embeddings
+- Vector Databases
+- FAISS Similarity Search
+- InsightFace
+- OpenCV
+- FastAPI
+- Real-Time Computer Vision
+- Backend System Design
 
-- Single-face requirement
-- Minimum face size in frame
-- Minimum detection confidence
-- Pose-specific checks (straight, left, right, up, down)
-- Stability hold time before capture acceptance
+---
 
-Captured poses are then posted in one enrollment request.
+# Future Improvements
 
-## Data persistence
+- Face anti-spoofing
+- Face mask detection
+- Multi-camera support
+- Face tracking
+- Unknown visitor alerts
+- Role-based authentication
+- Attendance analytics
+- Docker deployment
+- Cloud deployment
 
-- Face vectors are saved in data/faiss.index.
-- Label mapping is saved in data/labels.pkl.
-- Metadata (if DB configured) is saved in people and enrollment_sessions tables.
+---
 
-## Troubleshooting
+# Results
 
-### Camera not starting
+- Built a real-time AI face recognition platform using InsightFace and FAISS.
+- Improved recognition robustness through multi-angle enrollment.
+- Designed a modular FastAPI backend for maintainability.
+- Developed a responsive React dashboard for enrollment and live recognition.
+- Enabled scalable identity matching using vector similarity search.
 
-- Allow browser camera permission.
-- Use HTTPS or localhost context supported by your browser.
-- Confirm no other app is locking the webcam.
+---
 
-### Enrollment returns No face detected
+# Author
 
-- Improve lighting.
-- Keep one clear face centered.
-- Use higher-quality captures and stable pose.
+**Karan Shihire**
 
-### Low recognition accuracy
-
-- Enroll more varied angles per person.
-- Avoid blurry or heavily occluded captures.
-- Tune the similarity threshold in app/core/matcher.py and app/main.py.
-
-### Backend starts but frontend cannot connect
-
-- Confirm backend is on port 8000.
-- Set VITE_API_BASE_URL if backend is on another host/port.
-- Check CORS/network/firewall constraints.
-
-### FAISS files not updating
-
-- Ensure write permission in data.
-- Confirm enrollment completed successfully with at least one valid embedding.
-
-## Scripts
-
-Frontend scripts from package.json:
-
-- npm run dev
-- npm run build
-- npm run preview
-- npm run lint
-
-## Current status
-
-- Enrollment UI: implemented
-- Live detection UI: implemented
-- FastAPI integration: implemented
-- FAISS persistence: implemented
-- Optional PostgreSQL metadata logging: implemented
-- Performance optimization for high FPS: in progress
-
+AI Engineer | Computer Vision | Vector Search | FastAPI
